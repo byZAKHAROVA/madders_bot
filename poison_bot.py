@@ -1,6 +1,6 @@
 import telebot
 from telebot import types
-import sqlite3
+import psycopg2
 
 TOKEN = '5077856006:AAGt_p7AHtmo6afIltDoOWBBf7QzB5Ww4KQ'
 bot = telebot.TeleBot(TOKEN)
@@ -11,11 +11,11 @@ data_list = []
 @bot.message_handler(commands=['start'])
 def start(message, res=False):
     # подсоединились к бд, таблица users
-    connect = sqlite3.connect('madders_database.bd')
+    connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username STRING NOT NULL
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL
     )""")
     connect.commit()
 
@@ -25,10 +25,10 @@ def start(message, res=False):
     id_changed = "('" + str(id_list) + "',)"
     cursor.execute(f"SELECT id FROM users")
     data = cursor.fetchall()
-    """ почистить бд """
-    sql_delete_query = """DELETE from users where id = '[1167546391]'"""
+    """ почистить бд 
+    sql_delete_query = """"DELETE from users where id = "'[1167546391]'"""
     cursor.execute(sql_delete_query)
-    connect.commit()
+    connect.commit()"""
 
     for value in data:
         if id_changed != value:
@@ -57,17 +57,23 @@ def start(message, res=False):
 @bot.message_handler()
 def get_user_text(message):
     # подсоединились к бд, таблица orders
-    connect = sqlite3.connect('madders_database.bd')
+    connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS orders(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name_and_surname STRING NOT NULL,
-        order_name STRING,
+        id INTEGER PRIMARY KEY,
+        name_and_surname TEXT NOT NULL,
+        order_name TEXT,
         order_num INTEGER,
         order_price INTEGER,
         order_full_price INTEGER,
-        delivery_adress STRING
+        delivery_adress TEXT
     )""")
+    connect.commit()
+    cursor.execute("""ALTER TABLE orders ALTER COLUMN name_and_surname TYPE text;""")
+    connect.commit()
+    cursor.execute("""ALTER TABLE orders ALTER COLUMN order_name TYPE text;""")
+    connect.commit()
+    cursor.execute("""ALTER TABLE orders ALTER COLUMN delivery_adress TYPE text;""")
     connect.commit()
 
 
@@ -98,7 +104,7 @@ def get_user_text(message):
         start(message)
 
     elif message.text == "детки были бы здоровее и вкуснее":
-        connect = sqlite3.connect('madders_database.bd')
+        connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
         cursor = connect.cursor()
         cursor.execute(f"SELECT * FROM orders")
         data = cursor.fetchall()
@@ -161,11 +167,9 @@ def add_pack_2(message):
                          "Спасибо за заказ!♡\nЦену и сроки доставки вам сообщит наш менеджер после обработки заказа!",
                          reply_markup=markup)
         add_to_database(adress)
-        connect = sqlite3.connect('madders_database.bd')
+        connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
         cursor = connect.cursor()
-        sqlite_insert_with_param = "INSERT INTO orders (name_and_surname, order_name, order_num, order_price,order_full_price, delivery_adress) VALUES (?, ?, ?, ?, ?, ?);"
-        data_tuple = (data_list[1], data_list[0], 1, 0, 0, data_list[2])
-        cursor.execute(sqlite_insert_with_param, data_tuple)
+        cursor.execute("INSERT INTO orders (id, name_and_surname, order_name, order_num, order_price, order_full_price, delivery_adress) VALUES (%s, %s, %s, %s, %s, %s, %s);", (message.chat.id, data_list[1], data_list[0], 1, 0, 0, data_list[2]))
         connect.commit()
 
     make_adress(message)
@@ -178,3 +182,4 @@ def add_to_database(order):
 
 
 bot.polling(none_stop=True)
+
