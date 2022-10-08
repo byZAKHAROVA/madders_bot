@@ -1,9 +1,12 @@
 import telebot
 from telebot import types
 import psycopg2
+import os
 
 TOKEN = '5077856006:AAGt_p7AHtmo6afIltDoOWBBf7QzB5Ww4KQ'
 bot = telebot.TeleBot(TOKEN)
+
+DATABASE_URL = os.environ['postgres://ovjpgiaivcagsd:b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204@ec2-54-246-185-161.eu-west-1.compute.amazonaws.com:5432/d9emvsl74ldlf9']
 
 data_list = []
 
