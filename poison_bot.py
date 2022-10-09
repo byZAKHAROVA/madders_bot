@@ -1,10 +1,12 @@
 import telebot
 from telebot import types
 import psycopg2
-
+import os
 
 TOKEN = '5077856006:AAGt_p7AHtmo6afIltDoOWBBf7QzB5Ww4KQ'
 bot = telebot.TeleBot(TOKEN)
+
+DATABASE_URL = os.environ.get("postgres://ovjpgiaivcagsd:b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204@ec2-54-246-185-161.eu-west-1.compute.amazonaws.com:5432/d9emvsl74ldlf9", None)
 
 data_list = []
 
@@ -12,7 +14,7 @@ data_list = []
 @bot.message_handler(commands=['start'])
 def start(message, res=False):
     # подсоединились к бд, таблица users
-    connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
+    connect = psycopg2.connect(DATABASE_URL, dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY,
@@ -62,8 +64,7 @@ def get_user_text(message):
     # подсоединились к бд, таблица orders
     connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
     cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS orders(
-        id INTEGER PRIMARY KEY,
+    cursor.execute("""CREATE TABLE IF NOT EXISTS orders_new(
         name_and_surname TEXT NOT NULL,
         order_name TEXT,
         order_num INTEGER,
@@ -72,11 +73,12 @@ def get_user_text(message):
         delivery_adress TEXT
     )""")
     connect.commit()
-    cursor.execute("""ALTER TABLE orders ALTER COLUMN name_and_surname TYPE text;""")
+
+    cursor.execute("""ALTER TABLE orders_new ALTER COLUMN name_and_surname TYPE text;""")
     connect.commit()
-    cursor.execute("""ALTER TABLE orders ALTER COLUMN order_name TYPE text;""")
+    cursor.execute("""ALTER TABLE orders_new ALTER COLUMN order_name TYPE text;""")
     connect.commit()
-    cursor.execute("""ALTER TABLE orders ALTER COLUMN delivery_adress TYPE text;""")
+    cursor.execute("""ALTER TABLE orders_new ALTER COLUMN delivery_adress TYPE text;""")
     connect.commit()
 
 
@@ -109,7 +111,7 @@ def get_user_text(message):
     elif message.text == "детки были бы здоровее и вкуснее":
         connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
         cursor = connect.cursor()
-        cursor.execute(f"SELECT * FROM orders")
+        cursor.execute(f"SELECT * FROM orders_new")
         data = cursor.fetchall()
         bot.send_message(message.chat.id, str(data))
 
@@ -162,7 +164,6 @@ def add_pack_2(message):
         bot.register_next_step_handler(msg, get_adress)
 
     def get_adress(message):
-        id_num = 0
         markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         item = types.KeyboardButton('Вернуться на главную!')
         markup.add(item)
@@ -171,10 +172,9 @@ def add_pack_2(message):
                          "Спасибо за заказ!♡\nЦену и сроки доставки вам сообщит наш менеджер после обработки заказа!",
                          reply_markup=markup)
         add_to_database(adress)
-        id_num += 1
         connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
         cursor = connect.cursor()
-        cursor.execute("INSERT INTO orders (id, name_and_surname, order_name, order_num, order_price, order_full_price, delivery_adress) VALUES (%s, %s, %s, %s, %s, %s, %s);", (id_num, data_list[1], data_list[0], 1, 0, 0, data_list[2]))
+        cursor.execute("INSERT INTO orders_new (name_and_surname, order_name, order_num, order_price, order_full_price, delivery_adress) VALUES (%s, %s, %s, %s, %s, %s);", (data_list[1], data_list[0], 1, 0, 0, data_list[2]))
         connect.commit()
 
     make_adress(message)
