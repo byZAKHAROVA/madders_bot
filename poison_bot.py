@@ -1,12 +1,10 @@
 import telebot
 from telebot import types
 import psycopg2
-import os
+
 
 TOKEN = '5077856006:AAGt_p7AHtmo6afIltDoOWBBf7QzB5Ww4KQ'
 bot = telebot.TeleBot(TOKEN)
-
-DATABASE_URL = os.environ['postgres://ovjpgiaivcagsd:b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204@ec2-54-246-185-161.eu-west-1.compute.amazonaws.com:5432/d9emvsl74ldlf9']
 
 data_list = []
 
@@ -28,10 +26,12 @@ def start(message, res=False):
     id_changed = "('" + str(id_list) + "',)"
     cursor.execute(f"SELECT id FROM users")
     data = cursor.fetchall()
-    
-    sql_delete_query = """DELETE from users where id = '[1167546391]'"""
+    """
+    #почистить бд
+    sql_delete_query = """"DELETE from users where id = "'[1167546391]'"""
     cursor.execute(sql_delete_query)
     connect.commit()
+    """
 
     for value in data:
         if id_changed != value:
@@ -162,6 +162,7 @@ def add_pack_2(message):
         bot.register_next_step_handler(msg, get_adress)
 
     def get_adress(message):
+        id_num = 0
         markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         item = types.KeyboardButton('Вернуться на главную!')
         markup.add(item)
@@ -170,9 +171,10 @@ def add_pack_2(message):
                          "Спасибо за заказ!♡\nЦену и сроки доставки вам сообщит наш менеджер после обработки заказа!",
                          reply_markup=markup)
         add_to_database(adress)
+        id_num += 1
         connect = psycopg2.connect(dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
         cursor = connect.cursor()
-        cursor.execute("INSERT INTO orders (id, name_and_surname, order_name, order_num, order_price, order_full_price, delivery_adress) VALUES (%s, %s, %s, %s, %s, %s, %s);", (message.chat.id, data_list[1], data_list[0], 1, 0, 0, data_list[2]))
+        cursor.execute("INSERT INTO orders (id, name_and_surname, order_name, order_num, order_price, order_full_price, delivery_adress) VALUES (%s, %s, %s, %s, %s, %s, %s);", (id_num, data_list[1], data_list[0], 1, 0, 0, data_list[2]))
         connect.commit()
 
     make_adress(message)
@@ -185,4 +187,3 @@ def add_to_database(order):
 
 
 bot.polling(none_stop=True)
-
