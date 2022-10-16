@@ -10,7 +10,9 @@ DATABASE_URL = os.environ.get("postgres://ovjpgiaivcagsd:b848e6739db3babe64ea0d0
 
 data_list = []
 
+bot.delete_webhook()
 
+bot.set_webhook(url='https://git.heroku.com/maddersbot.git')
 @bot.message_handler(commands=['start'])
 def start(message, res=False):
     # подсоединились к бд, таблица users
