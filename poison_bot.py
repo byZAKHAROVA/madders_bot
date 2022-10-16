@@ -3,20 +3,20 @@ from telebot import types
 import psycopg2
 import os
 
+
 TOKEN = '5077856006:AAGt_p7AHtmo6afIltDoOWBBf7QzB5Ww4KQ'
 bot = telebot.TeleBot(TOKEN)
 
-DATABASE_URL = os.environ.get("postgres://ovjpgiaivcagsd:b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204@ec2-54-246-185-161.eu-west-1.compute.amazonaws.com:5432/d9emvsl74ldlf9", None)
+DATABASE_URL = os.environ.get("postgres://xmdkgoosppjkpf:ae401634958b7993c6f603e6a802486f2c6ac9bf88d6d5e9ba2ae25f9cb2a23d@ec2-34-242-84-130.eu-west-1.compute.amazonaws.com:5432/ddmafn6f85lbbi", None)
 
 data_list = []
 
-bot.delete_webhook()
 
-bot.set_webhook(url='https://maddersbot.herokuapp.com')
+
 @bot.message_handler(commands=['start'])
 def start(message, res=False):
     # подсоединились к бд, таблица users
-    connect = psycopg2.connect(DATABASE_URL, dbname='d9emvsl74ldlf9', user='ovjpgiaivcagsd', password='b848e6739db3babe64ea0d01efecd668fceb752fe8513840febde14b32a04204', host='ec2-54-246-185-161.eu-west-1.compute.amazonaws.com')
+    connect = psycopg2.connect(DATABASE_URL, dbname='ddmafn6f85lbbi', user='xmdkgoosppjkpf', password='ae401634958b7993c6f603e6a802486f2c6ac9bf88d6d5e9ba2ae25f9cb2a23d', host='ec2-34-242-84-130.eu-west-1.compute.amazonaws.com')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY,
@@ -30,12 +30,12 @@ def start(message, res=False):
     id_changed = "('" + str(id_list) + "',)"
     cursor.execute(f"SELECT id FROM users")
     data = cursor.fetchall()
-   
+
     #почистить бд
     sql_delete_query = """"DELETE from users where id = "'[1167546391]'"""
     cursor.execute(sql_delete_query)
     connect.commit()
-    
+
 
     for value in data:
         if id_changed != value:
