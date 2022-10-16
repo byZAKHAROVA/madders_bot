@@ -12,7 +12,7 @@ data_list = []
 
 bot.delete_webhook()
 
-bot.set_webhook(url='https://git.heroku.com/maddersbot.git')
+bot.set_webhook(url='https://maddersbot.herokuapp.com')
 @bot.message_handler(commands=['start'])
 def start(message, res=False):
     # подсоединились к бд, таблица users
