@@ -30,12 +30,12 @@ def start(message, res=False):
     id_changed = "('" + str(id_list) + "',)"
     cursor.execute(f"SELECT id FROM users")
     data = cursor.fetchall()
-    """
+   
     #почистить бд
     sql_delete_query = """"DELETE from users where id = "'[1167546391]'"""
     cursor.execute(sql_delete_query)
     connect.commit()
-    """
+    
 
     for value in data:
         if id_changed != value:
