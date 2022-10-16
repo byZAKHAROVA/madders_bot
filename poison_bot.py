@@ -32,7 +32,7 @@ def start(message, res=False):
     data = cursor.fetchall()
 
     #почистить бд
-    sql_delete_query = """"DELETE from users where id = "'[1167546391]'"""
+    sql_delete_query = """DELETE from users where id = 1167546391"""
     cursor.execute(sql_delete_query)
     connect.commit()
 
